@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Users } from 'output/entities/Users';
 import { UsersEducation } from 'output/entities/UsersEducation';
@@ -14,6 +14,8 @@ import {
 } from 'nestjs-typeorm-paginate';
 import { ProgramApplyProgress } from 'output/entities/ProgramApplyProgress';
 import { ProgramApply } from 'output/entities/ProgramApply';
+import { ViewDetail } from './interface/view-detail.interface';
+import { Dashboard } from './interface/dashboard.interface';
 
 @Injectable()
 export class ProgramsService {
@@ -77,15 +79,15 @@ export class ProgramsService {
     }
   }
 
-  public async getDashboard(userEntityId: number) {
+  public async getDashboard(userEntityId: number): Promise<Dashboard> {
     try {
       const query = `SELECT
-          u.user_entity_id,
-          u.user_first_name,
-          u.user_last_name,
-          pe.prog_title,
-          pa.prap_status,
-          pa.prap_modified_date,
+          u.user_entity_id AS "userEntityId",
+          u.user_first_name AS "userFirstName",
+          u.user_last_name AS "userLastName",
+          pe.prog_title AS "progTitle",
+          pa.prap_status AS "prapStatus",
+          pa.prap_modified_date AS "prapModifiedDate",
           (
             SELECT pap.parog_progress_name
             FROM bootcamp.program_apply_progress AS pap
@@ -94,7 +96,7 @@ export class ProgramsService {
               FROM bootcamp.program_apply_progress
               WHERE parog_prog_entity_id = pa.prap_prog_entity_id
             )
-          ) AS latest_progress
+          ) AS "latestProgress"
         FROM
           curriculum.program_entity pe
         JOIN bootcamp.program_apply pa ON pa.prap_prog_entity_id = pe.prog_entity_id
@@ -153,7 +155,9 @@ export class ProgramsService {
     ) {
       fileType = 'word';
     } else {
-      return 'Only .jpg, .pdf, and .docx are allowed';
+      throw new BadRequestException(
+        'Unable to take file format. Only .jpg, .pdf, and .docx are allowed',
+      );
     }
 
     return fileType;
@@ -187,9 +191,10 @@ export class ProgramsService {
       const getUserFile = await this.getUserMedia(userEntityId);
 
       getUserFile.usmeEntityId = userEntityId;
-      getUserFile.usmeFileLink = 'http://';
+      getUserFile.usmeFileLink = 'http:localhost:3001';
       getUserFile.usmeFilename = file.originalname;
       getUserFile.usmeFilesize = file.size;
+      getUserFile.usmeNote = 'Curicullum Vitae';
       getUserFile.usmeFiletype = FileType;
       getUserFile.usmeModifiedDate = new Date();
 
@@ -201,7 +206,38 @@ export class ProgramsService {
     }
   }
 
-  public async getProgress(userEntityId: number) {
+  public async uploadUserPhoto(userEntityId: number, file: any) {
+    try {
+      const FileType = this.getFileType(file.mimetype);
+
+      const getUser = await this.getUser(userEntityId);
+
+      getUser.userPhoto = file.originalname;
+      getUser.userModifiedDate = new Date();
+
+      const usersUpdate = await this.serviceUsers.save(getUser);
+
+      const Photo = new UsersMedia();
+
+      Photo.usmeEntityId = userEntityId;
+      Photo.usmeFileLink = 'http://';
+      Photo.usmeFilename = file.originalname;
+      Photo.usmeFilesize = file.size;
+      Photo.usmeNote = 'Profile Photo';
+      Photo.usmeFiletype = FileType;
+      Photo.usmeModifiedDate = new Date();
+
+      const newPhoto = await this.serviceUsersMedia.save(Photo);
+
+      return { usersUpdate, newPhoto };
+    } catch (error) {
+      return error.message;
+    }
+  }
+
+  public async getProgress(
+    userEntityId: number,
+  ): Promise<ProgramApplyProgress[]> {
     try {
       const progress = await this.servicePAP.find({
         where: {
@@ -215,47 +251,47 @@ export class ProgramsService {
     }
   }
 
-  public async viewDetail(progEntityId: number) {
+  public async viewDetail(progEntityId: number): Promise<ViewDetail> {
     try {
       const query1 = `SELECT  
-        pe.prog_entity_id,
-        pe.prog_title,
-        pe.prog_headline,
-        pe.prog_total_trainee,
-        pe.prog_price,
-        pe.prog_duration,
-        pe.prog_city_id,
-        pe.prog_created_by,
-        u.user_entity_id,
-        u.user_first_name,
-        u.user_last_name,
-        u.user_photo
+        pe.prog_entity_id AS "progEntityId",
+        pe.prog_title AS "progTitle",
+        pe.prog_headline AS "progHeadline",
+        pe.prog_total_trainee AS "progTotalTrainee",
+        pe.prog_price AS "progPrice",
+        pe.prog_duration AS "progDuration",
+        pe.prog_city_id AS "progCityId",
+        pe.prog_created_by AS "progCreatedBy",
+        u.user_entity_id AS "userEntityId",
+        u.user_first_name AS "userFirstName",
+        u.user_last_name AS "userLastName",
+        u.user_photo AS "userPhoto"
       FROM curriculum.program_entity pe
       JOIN hr.employee e on e.emp_entity_id = pe.prog_created_by
       JOIN users.users u on u.user_entity_id = e.emp_entity_id
       WHERE pe.prog_entity_id = $1::integer`;
 
-      const query2 = `SELECT 
-        s.sect_id,
-        s.sect_prog_entity_id,
-        s.sect_title,
-        JSONB_AGG(JSON_BUILD_OBJECT('secd_id', sd.secd_id, 'secd_title', sd.secd_title)) AS section_details
+      const query2 = `SELECT pred_item_learning AS "predItemLearning" FROM curriculum.program_entity_description WHERE pred_prog_entity_id = $1::integer`;
+
+      const query3 = `SELECT 
+        s.sect_id AS "sectId",
+        s.sect_prog_entity_id AS "sectProgEntity",
+        s.sect_title AS "sectTitle",
+        JSONB_AGG(JSON_BUILD_OBJECT('secdId', sd.secd_id, 'secdTitle', sd.secd_title)) AS "sectionDetails"
       FROM curriculum.sections s
       JOIN curriculum.section_detail sd ON s.sect_id = sd.secd_sect_id
       WHERE s.sect_prog_entity_id = $1::integer
       GROUP BY s.sect_id, s.sect_prog_entity_id;`;
 
-      const query3 = `SELECT pred_item_learning FROM curriculum.program_entity_description WHERE pred_prog_entity_id = $1::integer`;
-
       const query4 = `SELECT 
-        pr.prow_user_entity_id,
-        pr.prow_prog_entity_id,
-        pr.prow_review,
-        pr.prow_rating,
-        u.user_entity_id,
-        u.user_first_name,
-        u.user_last_name,
-        u.user_photo
+        pr.prow_user_entity_id AS "prowUserEntity",
+        pr.prow_prog_entity_id AS "prowProgEntity",
+        pr.prow_review AS "prowReview",
+        pr.prow_rating AS "prowRating",
+        u.user_entity_id AS "reviewUserEntityId",
+        u.user_first_name AS "reviewUserFirstName",
+        u.user_last_name AS "reviewUserLastName",
+        u.user_photo AS "reviewUserPhoto"
       FROM curriculum.program_reviews pr
       JOIN users.users u on u.user_entity_id = pr.prow_user_entity_id
       WHERE pr.prow_prog_entity_id = $1::integer`;
@@ -263,8 +299,8 @@ export class ProgramsService {
       const param = [progEntityId];
 
       const bootcampAndMentor = await this.servicePE.query(query1, param);
-      const learnItems = await this.servicePE.query(query3, param);
-      const material = await this.servicePE.query(query2, param);
+      const learnItems = await this.servicePE.query(query2, param);
+      const material = await this.servicePE.query(query3, param);
       const review = await this.servicePE.query(query4, param);
 
       return { bootcampAndMentor, learnItems, material, review };

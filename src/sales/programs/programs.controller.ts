@@ -67,6 +67,15 @@ export class ProgramsController {
     return this.Services.updateUsers(userEntityId, user, education, file);
   }
 
+  @Put('applyRegular/uploadPhoto')
+  @UseInterceptors(FileInterceptor('file'))
+  public async uploadPhoto(
+    @Query('userEntityId', ParseIntPipe) userEntityId: number,
+    @UploadedFile() file: any,
+  ) {
+    return this.Services.uploadUserPhoto(userEntityId, file);
+  }
+
   @Get('applyProgress/:userEntityId')
   public async getProgress(@Param('userEntityId') userEntityId: number) {
     return this.Services.getProgress(userEntityId);

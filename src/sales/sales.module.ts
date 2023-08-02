@@ -11,6 +11,8 @@ import { UsersMedia } from 'output/entities/UsersMedia';
 import { ProgramEntity } from 'output/entities/ProgramEntity';
 import { ProgramApply } from 'output/entities/ProgramApply';
 import { ProgramApplyProgress } from 'output/entities/ProgramApplyProgress';
+import { MulterModule } from '@nestjs/platform-express';
+import { UploadMulter } from 'src/multer/multer';
 
 @Module({
   imports: [
@@ -23,6 +25,7 @@ import { ProgramApplyProgress } from 'output/entities/ProgramApplyProgress';
       ProgramApply,
       ProgramApplyProgress,
     ]),
+    MulterModule.register(UploadMulter.MulterOption()),
   ],
   controllers: [CartController, ProgramsController],
   providers: [CartService, ProgramsService],
