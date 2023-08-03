@@ -1,16 +1,42 @@
-import { Controller, Get, Query } from '@nestjs/common';
+/* eslint-disable prettier/prettier */
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Query,
+} from '@nestjs/common';
 import { CartService } from './cart.service';
-import { CartUserDto } from './dto/cartUser.dto';
+import { CartUserDto } from './dto/cart-user.dto';
+import { AddToCartDto } from './dto/add-cart.dto';
 
 @Controller('api/programs/sales/cart')
 export class CartController {
   constructor(private cartService: CartService) {}
 
   @Get()
-  findOne(@Query() id: CartUserDto) {
-    return this.cartService.getCartByUserId(id);
+  async findOne(@Query() id: CartUserDto) {
+    return { data: await this.cartService.getCart(id) };
+  }
+  @Post('add')
+  addToCart(@Body() body: AddToCartDto) {
+    return this.cartService.addToCart(body);
+  }
+  @Delete(':id')
+  removeCart(@Param('id') id: number) {
+    return this.cartService.removeCart(id);
   }
 }
+// @Controller('api/programs/sales/cart/add')
+// export class AddToCartController {
+//   constructor(private cartService: CartService) {}
+//   @Post()
+//   addToCart(@Body() body: AddToCartDto) {
+//     return this.cartService.addToCart(body);
+//   }
+// }
 
 // @Controller('api/programs/sales/discount')
 // export class DiscountController{

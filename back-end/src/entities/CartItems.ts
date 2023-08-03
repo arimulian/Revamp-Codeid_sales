@@ -20,7 +20,7 @@ export class CartItems {
   caitQuantity: number | null;
 
   @Column('money', { name: 'cait_unit_price', nullable: true })
-  caitUnitPrice: string | null;
+  caitUnitPrice: number | null;
 
   @Column('timestamp without time zone', {
     name: 'cait_modified_date',
