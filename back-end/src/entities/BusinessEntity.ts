@@ -2,10 +2,14 @@ import {
   Column,
   Entity,
   Index,
+  OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
 } from "typeorm";
+import { Bank } from "./Bank";
+import { Fintech } from "./Fintech";
 import { Users } from "./Users";
+import { UsersAccount } from "./UsersAccount";
 
 @Index("business_entity_pkey", ["entityId"], { unique: true })
 @Entity("business_entity", { schema: "users" })
@@ -20,6 +24,18 @@ export class BusinessEntity {
   })
   entityModifiedDate: string | null;
 
+  @OneToOne(() => Bank, (bank) => bank.bankEntity)
+  bank: Bank;
+
+  @OneToOne(() => Fintech, (fintech) => fintech.fintEntity)
+  fintech: Fintech;
+
   @OneToOne(() => Users, (users) => users.userEntity)
   users: Users;
+
+  @OneToMany(
+    () => UsersAccount,
+    (usersAccount) => usersAccount.usacBankEntity_2
+  )
+  usersAccounts: UsersAccount[];
 }

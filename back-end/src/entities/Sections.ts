@@ -10,8 +10,8 @@ import {
 import { SectionDetail } from "./SectionDetail";
 import { ProgramEntity } from "./ProgramEntity";
 
-@Index("sect_id", ["sectId", "sectProgEntityId"], { unique: true })
 @Index("sections_sect_id_key", ["sectId"], { unique: true })
+@Index("sect_id", ["sectId", "sectProgEntityId"], { unique: true })
 @Entity("sections", { schema: "curriculum" })
 export class Sections {
   @PrimaryGeneratedColumn({ type: "integer", name: "sect_id" })

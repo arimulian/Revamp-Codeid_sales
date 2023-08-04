@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 import {
   Column,
   Entity,
@@ -8,133 +7,133 @@ import {
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
-} from 'typeorm';
-import { CartItems } from './CartItems';
-import { Category } from './Category';
-import { City } from './City';
-import { Status } from './Status';
-import { ProgramEntityDescription } from './ProgramEntityDescription';
-import { ProgramReviews } from './ProgramReviews';
-import { SalesOrderDetail } from './SalesOrderDetail';
-import { Sections } from './Sections';
-import { SpecialOfferPrograms } from './SpecialOfferPrograms';
+} from "typeorm";
+import { CartItems } from "./CartItems";
+import { Category } from "./Category";
+import { City } from "./City";
+import { Status } from "./Status";
+import { ProgramEntityDescription } from "./ProgramEntityDescription";
+import { ProgramReviews } from "./ProgramReviews";
+import { SalesOrderDetail } from "./SalesOrderDetail";
+import { Sections } from "./Sections";
+import { SpecialOfferPrograms } from "./SpecialOfferPrograms";
 
-@Index('program_entity_pkey', ['progEntityId'], { unique: true })
-@Entity('program_entity', { schema: 'curriculum' })
+@Index("program_entity_pkey", ["progEntityId"], { unique: true })
+@Entity("program_entity", { schema: "curriculum" })
 export class ProgramEntity {
-  @PrimaryGeneratedColumn({ type: 'integer', name: 'prog_entity_id' })
+  @PrimaryGeneratedColumn({ type: "integer", name: "prog_entity_id" })
   progEntityId: number;
 
-  @Column('character varying', {
-    name: 'prog_title',
+  @Column("character varying", {
+    name: "prog_title",
     nullable: true,
     length: 256,
   })
   progTitle: string | null;
 
-  @Column('character varying', {
-    name: 'prog_headline',
+  @Column("character varying", {
+    name: "prog_headline",
     nullable: true,
     length: 512,
   })
   progHeadline: string | null;
 
-  @Column('character varying', {
-    name: 'prog_type',
+  @Column("character varying", {
+    name: "prog_type",
     nullable: true,
     length: 15,
   })
   progType: string | null;
 
-  @Column('character varying', {
-    name: 'prog_learning_type',
+  @Column("character varying", {
+    name: "prog_learning_type",
     nullable: true,
     length: 15,
   })
   progLearningType: string | null;
 
-  @Column('integer', { name: 'prog_rating', nullable: true })
+  @Column("integer", { name: "prog_rating", nullable: true })
   progRating: number | null;
 
-  @Column('integer', { name: 'prog_total_trainee', nullable: true })
+  @Column("integer", { name: "prog_total_trainee", nullable: true })
   progTotalTrainee: number | null;
 
-  @Column('timestamp without time zone', {
-    name: 'prog_modified_date',
+  @Column("timestamp without time zone", {
+    name: "prog_modified_date",
     nullable: true,
   })
   progModifiedDate: Date | null;
 
-  @Column('character varying', {
-    name: 'prog_image',
+  @Column("character varying", {
+    name: "prog_image",
     nullable: true,
     length: 256,
   })
   progImage: string | null;
 
-  @Column('character', { name: 'prog_best_seller', nullable: true, length: 1 })
+  @Column("character", { name: "prog_best_seller", nullable: true, length: 1 })
   progBestSeller: string | null;
 
-  @Column('integer', { name: 'prog_price', nullable: true })
+  @Column("integer", { name: "prog_price", nullable: true })
   progPrice: number | null;
 
-  @Column('character varying', {
-    name: 'prog_language',
+  @Column("character varying", {
+    name: "prog_language",
     nullable: true,
     length: 35,
   })
   progLanguage: string | null;
 
-  @Column('integer', { name: 'prog_duration', nullable: true })
+  @Column("integer", { name: "prog_duration", nullable: true })
   progDuration: number | null;
 
-  @Column('character varying', {
-    name: 'prog_duration_type',
+  @Column("character varying", {
+    name: "prog_duration_type",
     nullable: true,
     length: 15,
   })
   progDurationType: string | null;
 
-  @Column('character varying', {
-    name: 'prog_tag_skill',
+  @Column("character varying", {
+    name: "prog_tag_skill",
     nullable: true,
     length: 512,
   })
   progTagSkill: string | null;
 
-  @Column('integer', { name: 'prog_created_by', nullable: true })
+  @Column("integer", { name: "prog_created_by", nullable: true })
   progCreatedBy: number | null;
 
   @OneToMany(() => CartItems, (cartItems) => cartItems.caitProgEntity)
   cartItems: CartItems[];
 
   @ManyToOne(() => Category, (category) => category.programEntities)
-  @JoinColumn([{ name: 'prog_cate_id', referencedColumnName: 'cateId' }])
+  @JoinColumn([{ name: "prog_cate_id", referencedColumnName: "cateId" }])
   progCate: Category;
 
   @ManyToOne(() => City, (city) => city.programEntities)
-  @JoinColumn([{ name: 'prog_city_id', referencedColumnName: 'cityId' }])
+  @JoinColumn([{ name: "prog_city_id", referencedColumnName: "cityId" }])
   progCity: City;
 
   @ManyToOne(() => Status, (status) => status.programEntities)
-  @JoinColumn([{ name: 'prog_status', referencedColumnName: 'status' }])
+  @JoinColumn([{ name: "prog_status", referencedColumnName: "status" }])
   progStatus: Status;
 
   @OneToOne(
     () => ProgramEntityDescription,
-    (programEntityDescription) => programEntityDescription.predProgEntity,
+    (programEntityDescription) => programEntityDescription.predProgEntity
   )
   programEntityDescription: ProgramEntityDescription;
 
   @OneToMany(
     () => ProgramReviews,
-    (programReviews) => programReviews.prowProgEntity,
+    (programReviews) => programReviews.prowProgEntity
   )
   programReviews: ProgramReviews[];
 
   @OneToMany(
     () => SalesOrderDetail,
-    (salesOrderDetail) => salesOrderDetail.sodeProgEntity,
+    (salesOrderDetail) => salesOrderDetail.sodeProgEntity
   )
   salesOrderDetails: SalesOrderDetail[];
 
@@ -143,7 +142,7 @@ export class ProgramEntity {
 
   @OneToMany(
     () => SpecialOfferPrograms,
-    (specialOfferPrograms) => specialOfferPrograms.socoProgEntity,
+    (specialOfferPrograms) => specialOfferPrograms.socoProgEntity
   )
   specialOfferPrograms: SpecialOfferPrograms[];
 }

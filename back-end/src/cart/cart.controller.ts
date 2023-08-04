@@ -18,8 +18,12 @@ export class CartController {
 
   @Get()
   async findOne(@Query() id: CartUserDto) {
-    return { data: await this.cartService.getCart(id) };
+    const cartData = await this.cartService.getCart(id);
+    return {
+      data: cartData,
+    };
   }
+
   @Post('add')
   addToCart(@Body() body: AddToCartDto) {
     return this.cartService.addToCart(body);
