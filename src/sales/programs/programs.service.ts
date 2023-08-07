@@ -14,8 +14,6 @@ import {
 } from 'nestjs-typeorm-paginate';
 import { ProgramApplyProgress } from 'output/entities/ProgramApplyProgress';
 import { ProgramApply } from 'output/entities/ProgramApply';
-import { ViewDetail } from './interface/view-detail.interface';
-import { Dashboard } from './interface/dashboard.interface';
 
 @Injectable()
 export class ProgramsService {
@@ -33,6 +31,7 @@ export class ProgramsService {
   ) {}
 
   private order(orderBy: string) {
+    // set order by clause
     let order = '';
     if (orderBy === 'Online/Offline') {
       order = 'programEntity.progLearningType';
@@ -47,6 +46,7 @@ export class ProgramsService {
 
   public async findAll(orderBy: string): Promise<ProgramEntity[]> {
     try {
+      // get all available bootcamp data
       const order = this.order(orderBy);
 
       return await this.servicePE
@@ -64,6 +64,7 @@ export class ProgramsService {
     options: IPaginationOptions,
   ): Promise<Pagination<ProgramEntity>> {
     try {
+      // get searched boorcamp data
       const order = this.order(orderBy);
 
       const search = await this.servicePE
@@ -79,8 +80,9 @@ export class ProgramsService {
     }
   }
 
-  public async getDashboard(userEntityId: number): Promise<Dashboard> {
+  public async getDashboard(userEntityId: number) {
     try {
+      // get bootcamp dashboard data of user
       const query = `SELECT
           u.user_entity_id AS "userEntityId",
           u.user_first_name AS "userFirstName",
@@ -104,13 +106,17 @@ export class ProgramsService {
         WHERE u.user_entity_id = $1::integer`;
       const param = [userEntityId];
 
-      const Dashboard = await this.serviceUsers.query(query, param);
+      const dashboard = await this.serviceUsers.query(query, param);
 
-      return Dashboard;
-    } catch (error) {}
+      return dashboard;
+    } catch (error) {
+      return error.message;
+    }
   }
+
   public async getUser(userEntityId: number): Promise<Users> {
     try {
+      // get user data
       const User = await this.serviceUsers.findOne({
         where: { userEntityId: userEntityId },
       });
@@ -122,6 +128,7 @@ export class ProgramsService {
 
   public async getUserEdu(userEntityId: number): Promise<UsersEducation> {
     try {
+      // get user education data
       const userEdu = await this.serviceUsersEducation.findOne({
         where: { usduEntityId: userEntityId },
       });
@@ -131,10 +138,17 @@ export class ProgramsService {
     }
   }
 
-  public async getUserMedia(userEntityId: number): Promise<UsersMedia> {
+  public async getUserMedia(
+    userEntityId: number,
+    note: string,
+  ): Promise<UsersMedia> {
     try {
+      // get user media data based on file note
       const userMedia = await this.serviceUsersMedia.findOne({
-        where: { usmeEntityId: userEntityId },
+        where: {
+          usmeEntityId: userEntityId,
+          usmeNote: note,
+        },
       });
       return userMedia;
     } catch (error) {
@@ -143,6 +157,7 @@ export class ProgramsService {
   }
 
   private getFileType(file: string) {
+    // set usme filetype
     let fileType = '';
 
     if (file === 'application/pdf') {
@@ -172,6 +187,7 @@ export class ProgramsService {
     try {
       const FileType = this.getFileType(file.mimetype);
 
+      // update users data
       const getUser = await this.getUser(userEntityId);
 
       getUser.userFirstName = user.firstName;
@@ -180,6 +196,7 @@ export class ProgramsService {
 
       const usersUpdate = await this.serviceUsers.save(getUser);
 
+      // update users education data
       const getUserEdu = await this.getUserEdu(userEntityId);
 
       getUserEdu.usduSchool = education.school;
@@ -188,17 +205,26 @@ export class ProgramsService {
 
       const usersEduUpdate = await this.serviceUsersEducation.save(getUserEdu);
 
-      const getUserFile = await this.getUserMedia(userEntityId);
+      // upload / create new users cv
+      const cvData = {
+        usmeEntityId: userEntityId,
+        usmeFileLink: `http://localhost:3001/programs/image/${file.originalname}`,
+        usmeFilename: file.originalname,
+        usmeFilesize: file.size,
+        usmeNote: 'Curicullum Vitae',
+        usmeFiletype: FileType,
+        usmeModifiedDate: new Date(),
+      };
 
-      getUserFile.usmeEntityId = userEntityId;
-      getUserFile.usmeFileLink = 'http:localhost:3001';
-      getUserFile.usmeFilename = file.originalname;
-      getUserFile.usmeFilesize = file.size;
-      getUserFile.usmeNote = 'Curicullum Vitae';
-      getUserFile.usmeFiletype = FileType;
-      getUserFile.usmeModifiedDate = new Date();
+      let getCV = await this.getUserMedia(userEntityId, 'Curicullum Vitae');
 
-      const updateCv = await this.serviceUsersMedia.save(getUserFile);
+      if (getCV) {
+        getCV = { ...getCV, ...cvData };
+      } else {
+        getCV = this.serviceUsersMedia.create(cvData);
+      }
+
+      const updateCv = await this.serviceUsersMedia.save(getCV);
 
       return { usersUpdate, usersEduUpdate, updateCv };
     } catch (error) {
@@ -210,6 +236,7 @@ export class ProgramsService {
     try {
       const FileType = this.getFileType(file.mimetype);
 
+      // update users userPhoto
       const getUser = await this.getUser(userEntityId);
 
       getUser.userPhoto = file.originalname;
@@ -217,15 +244,24 @@ export class ProgramsService {
 
       const usersUpdate = await this.serviceUsers.save(getUser);
 
-      const Photo = new UsersMedia();
+      // update / create profile picture in userMedia
+      const photoData = {
+        usmeEntityId: userEntityId,
+        usmeFileLink: `http://localhost:3001/programs/image/${file.originalname}`,
+        usmeFilename: file.originalname,
+        usmeFilesize: file.size,
+        usmeNote: 'Profile Photo',
+        usmeFiletype: FileType,
+        usmeModifiedDate: new Date(),
+      };
 
-      Photo.usmeEntityId = userEntityId;
-      Photo.usmeFileLink = 'http://';
-      Photo.usmeFilename = file.originalname;
-      Photo.usmeFilesize = file.size;
-      Photo.usmeNote = 'Profile Photo';
-      Photo.usmeFiletype = FileType;
-      Photo.usmeModifiedDate = new Date();
+      let Photo = await this.getUserMedia(userEntityId, 'Profile Photo');
+
+      if (Photo) {
+        Photo = { ...Photo, ...photoData };
+      } else {
+        Photo = this.serviceUsersMedia.create(photoData);
+      }
 
       const newPhoto = await this.serviceUsersMedia.save(Photo);
 
@@ -239,6 +275,7 @@ export class ProgramsService {
     userEntityId: number,
   ): Promise<ProgramApplyProgress[]> {
     try {
+      // get bootcamp apply progress data
       const progress = await this.servicePAP.find({
         where: {
           parogUserEntityId: userEntityId,
@@ -251,7 +288,7 @@ export class ProgramsService {
     }
   }
 
-  public async viewDetail(progEntityId: number): Promise<ViewDetail> {
+  public async viewDetail(progEntityId: number) {
     try {
       const query1 = `SELECT  
         pe.prog_entity_id AS "progEntityId",
@@ -298,9 +335,13 @@ export class ProgramsService {
 
       const param = [progEntityId];
 
-      const bootcampAndMentor = await this.servicePE.query(query1, param);
-      const learnItems = await this.servicePE.query(query2, param);
+      // get detail bootcamp and mentor data
+      const [bootcampAndMentor] = await this.servicePE.query(query1, param);
+      // get learning items data (What you'll learn section)
+      const [learnItems] = await this.servicePE.query(query2, param);
+      // get bootcamp material data
       const material = await this.servicePE.query(query3, param);
+      // get review data
       const review = await this.servicePE.query(query4, param);
 
       return { bootcampAndMentor, learnItems, material, review };
@@ -311,23 +352,25 @@ export class ProgramsService {
 
   public async applyBootcamp(progEntityId: number) {
     try {
-      const Apply = new ProgramApply();
+      // create new bootcamp apply application
 
-      Apply.prapProgEntityId = progEntityId;
-      Apply.prapTestScore = 0;
-      Apply.prapGpa = 0;
-      Apply.prapIqTest = 0;
-      Apply.prapModifiedDate = new Date();
+      const Apply = this.servicePA.create({
+        prapProgEntityId: progEntityId,
+        prapTestScore: 0,
+        prapGpa: 0,
+        prapIqTest: 0,
+        prapModifiedDate: new Date(),
+      });
 
       const createApply = await this.servicePA.save(Apply);
 
-      const ApplyProgress = new ProgramApplyProgress();
-
-      ApplyProgress.parogProgEntityId = progEntityId;
-      ApplyProgress.parogActionDate = new Date();
-      ApplyProgress.parogModifiedDate = new Date();
-      ApplyProgress.parogComment = null;
-      ApplyProgress.parogProgressName = 'Apply Aplication';
+      const ApplyProgress = this.servicePAP.create({
+        parogProgEntityId: progEntityId,
+        parogActionDate: new Date(),
+        parogModifiedDate: new Date(),
+        parogComment: null,
+        parogProgressName: 'Apply Aplication',
+      });
 
       const createApplyProgress = await this.servicePAP.save(ApplyProgress);
 
