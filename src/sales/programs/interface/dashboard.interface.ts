@@ -1,6 +1,6 @@
 export interface Dashboard {
   userEntityId: number;
-  userFirstName: number;
+  userFirstName: string;
   userLastName: string;
   progTitle: string;
   prapStatus: string;
