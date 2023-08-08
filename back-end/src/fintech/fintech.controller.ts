@@ -1,19 +1,19 @@
 import { Controller, Get, Post, Query } from '@nestjs/common';
 import { FintechService } from './fintech.service';
 import { Fintech } from 'src/entities/Fintech';
-import { verifyFintechDto } from './dto/verify-fintech.dto';
+import { FintechDto } from './dto/fintech.dto';
 
 @Controller('api/fintech')
 export class FintechController {
   constructor(private fintechService: FintechService) {}
 
   @Get()
-  findFintech(): Promise<Fintech[]> {
-    return this.fintechService.getFintech();
+  findFintech(@Query() account: FintechDto): Promise<Fintech[]> {
+    return this.fintechService.getFintech(account);
   }
 
   @Post('verify')
-  verifyFintech(@Query() account: verifyFintechDto): Promise<void> {
+  verifyFintech(@Query() account: FintechDto): Promise<void> {
     return this.fintechService.verifyFintech(account);
   }
 }

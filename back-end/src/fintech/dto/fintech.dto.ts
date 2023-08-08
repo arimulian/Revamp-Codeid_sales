@@ -1,6 +1,7 @@
+/* eslint-disable prettier/prettier */
 import { IsNotEmpty } from 'class-validator';
 
-export class verifyFintechDto {
+export class FintechDto {
   @IsNotEmpty()
   accountNumber: string;
 }

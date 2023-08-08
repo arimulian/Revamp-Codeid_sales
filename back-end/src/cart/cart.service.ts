@@ -65,24 +65,26 @@ export class CartService {
       );
       if (cart.length < 1) {
         // Create a new item in the cart
+        const total = program.progPrice * caitQuantity;
         const newItem = this.cartRepository.create({
-          caitUnitPrice: program.progPrice * caitQuantity,
+          caitUnitPrice: total.toLocaleString('id-ID'),
           caitQuantity: caitQuantity,
           caitModifiedDate: new Date(),
         });
 
         newItem.caitUserEntity = user;
         newItem.caitProgEntity = program;
-
-        return await this.cartRepository.save(newItem);
+        console.log(newItem);
+        // return await this.cartRepository.save(newItem);
       } else {
+        const newTotal = cart[0].caitUnitPrice;
         // Update the item quantity
         const updatedQuantity = (cart[0].caitQuantity += 1);
-        const updatedUnitPrice = cart[0].caitUnitPrice * updatedQuantity;
+        const updatedUnitPrice = parseInt(newTotal) * updatedQuantity;
 
         return await this.cartRepository.update(cart[0].caitId, {
           caitQuantity: updatedQuantity,
-          caitUnitPrice: updatedUnitPrice,
+          caitUnitPrice: updatedUnitPrice.toLocaleString('id-ID'),
         });
       }
     }
@@ -125,6 +127,7 @@ export class CartService {
         }
         return {
           status: HttpStatus.OK,
+          count: query.length,
           data: query,
         };
       }

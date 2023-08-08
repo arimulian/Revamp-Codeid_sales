@@ -5,7 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Fintech } from 'src/entities/Fintech';
 import { UsersAccount } from 'src/entities/UsersAccount';
 import { Repository } from 'typeorm';
-import { verifyFintechDto } from './dto/verify-fintech.dto';
+import { FintechDto } from './dto/fintech.dto';
 
 @Injectable()
 export class FintechService {
@@ -22,7 +22,7 @@ export class FintechService {
    * @returns A promise that resolves to the account information if it is valid.
    * @throws InternalServerErrorException if the account is not valid, inactive, or blocked.
    */
-  async verifyFintech(acc: verifyFintechDto): Promise<any> {
+  async verifyFintech(acc: FintechDto): Promise<any> {
     const { accountNumber } = acc;
     const account = await this.usersAccountRepository.findOne({
       where: { usacAccountNumber: accountNumber },
@@ -46,11 +46,6 @@ export class FintechService {
     }
     return {
       message: 'account number: ' + account.usacAccountNumber + ' is valid',
-      data: {
-        accountNumber: account.usacAccountNumber,
-        accountName: account.usacUserEntity,
-        credit: account.usacSaldo,
-      },
     };
   }
 
@@ -59,10 +54,23 @@ export class FintechService {
    * @returns {Promise<Fintech[]>} - A promise that resolves to an array of Fintech objects.
    * @throws {InternalServerErrorException} - If there was an error retrieving the data.
    */
-  async getFintech(): Promise<Fintech[]> {
+  async getFintech(data: FintechDto): Promise<any> {
+    const { accountNumber } = data;
     try {
-      const data = await this.fintechRepository.find();
-      return data;
+      const account = await this.usersAccountRepository.findOne({
+        where: { usacAccountNumber: accountNumber },
+        relations: { usacUserEntity: true },
+        select: {
+          usacUserEntity: { userName: true, userEntityId: true },
+        },
+      });
+      return {
+        data: {
+          accountNumber: account.usacAccountNumber,
+          accountName: account.usacUserEntity,
+          credit: account.usacSaldo,
+        },
+      };
     } catch (error) {
       throw new InternalServerErrorException(error);
     }

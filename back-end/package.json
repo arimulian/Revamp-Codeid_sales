@@ -18,7 +18,7 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "db": "typeorm-model-generator -h localhost -d revamp_db -p 5432 -u postgres -x Manurung081020* -e postgres -s sales,master,curriculum,users,payment"
+    "db": "typeorm-model-generator -h localhost -d revamp_db -p 5432 -u postgres -x  -e postgres -s sales,master,curriculum,users,payment"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",
@@ -28,6 +28,7 @@
     "@nestjs/typeorm": "^10.0.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.0",
+    "moment": "^2.29.4",
     "multer": "^1.4.5-lts.1",
     "nestjs-typeorm-paginate": "^4.0.4",
     "pg": "^8.11.1",
