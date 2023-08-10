@@ -24,9 +24,12 @@ import { join } from 'path';
 export class ProgramsController {
   constructor(private Services: ProgramsService) {}
 
-  @Post('progEntity')
-  public async applyBootcamp(@Query('id', ParseIntPipe) id: number) {
-    return this.Services.applyBootcamp(id);
+  @Post('prog-entity')
+  public async applyBootcamp(
+    @Query('userEntityId', ParseIntPipe) userEntityId: number,
+    @Query('progEntityId', ParseIntPipe) progEntityId: number,
+  ) {
+    return this.Services.applyBootcamp(userEntityId, progEntityId);
   }
 
   @Get()
@@ -56,7 +59,7 @@ export class ProgramsController {
     return this.Services.viewDetail(progEntityId);
   }
 
-  @Put('applyRegular')
+  @Put('apply-regular')
   @UseInterceptors(FileInterceptor('file'))
   public async updateUsers(
     @Query('userEntityId', ParseIntPipe) userEntityId: number,
@@ -67,7 +70,7 @@ export class ProgramsController {
     return this.Services.updateUsers(userEntityId, user, education, file);
   }
 
-  @Put('applyRegular/uploadPhoto')
+  @Put('apply-regular/upload-photo')
   @UseInterceptors(FileInterceptor('file'))
   public async uploadPhoto(
     @Query('userEntityId', ParseIntPipe) userEntityId: number,
@@ -76,7 +79,7 @@ export class ProgramsController {
     return this.Services.uploadUserPhoto(userEntityId, file);
   }
 
-  @Get('applyProgress/:userEntityId')
+  @Get('apply-progress/:userEntityId')
   public async getProgress(@Param('userEntityId') userEntityId: number) {
     return this.Services.getProgress(userEntityId);
   }

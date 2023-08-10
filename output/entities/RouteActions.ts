@@ -4,8 +4,10 @@ import {
   Index,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from "typeorm";
+import { ProgramApplyProgress } from "./ProgramApplyProgress";
 import { Modules } from "./Modules";
 
 @Index("route_actions_pkey", ["roacId"], { unique: true })
@@ -26,6 +28,12 @@ export class RouteActions {
 
   @Column("integer", { name: "roac_display", nullable: true })
   roacDisplay: number | null;
+
+  @OneToMany(
+    () => ProgramApplyProgress,
+    (programApplyProgress) => programApplyProgress.parogRoac
+  )
+  programApplyProgresses: ProgramApplyProgress[];
 
   @ManyToOne(() => Modules, (modules) => modules.routeActions)
   @JoinColumn([

@@ -14,20 +14,24 @@ import {
 } from 'nestjs-typeorm-paginate';
 import { ProgramApplyProgress } from 'output/entities/ProgramApplyProgress';
 import { ProgramApply } from 'output/entities/ProgramApply';
+import { Status } from 'output/entities/Status';
+import { Employee } from 'output/entities/Employee';
+import { RouteActions } from 'output/entities/RouteActions';
 
 @Injectable()
 export class ProgramsService {
   constructor(
-    @InjectRepository(Users) private serviceUsers: Repository<Users>,
+    @InjectRepository(Users) private serviceU: Repository<Users>,
     @InjectRepository(UsersEducation)
-    private serviceUsersEducation: Repository<UsersEducation>,
+    private serviceUE: Repository<UsersEducation>,
     @InjectRepository(UsersMedia)
-    private serviceUsersMedia: Repository<UsersMedia>,
+    private serviceUM: Repository<UsersMedia>,
     @InjectRepository(ProgramEntity)
     private servicePE: Repository<ProgramEntity>,
     @InjectRepository(ProgramApplyProgress)
     private servicePAP: Repository<ProgramApplyProgress>,
     @InjectRepository(ProgramApply) private servicePA: Repository<ProgramApply>,
+    @InjectRepository(Employee) private serviceE: Repository<Employee>,
   ) {}
 
   private order(orderBy: string) {
@@ -106,7 +110,7 @@ export class ProgramsService {
         WHERE u.user_entity_id = $1::integer`;
       const param = [userEntityId];
 
-      const dashboard = await this.serviceUsers.query(query, param);
+      const dashboard = await this.serviceU.query(query, param);
 
       return dashboard;
     } catch (error) {
@@ -117,7 +121,7 @@ export class ProgramsService {
   public async getUser(userEntityId: number): Promise<Users> {
     try {
       // get user data
-      const User = await this.serviceUsers.findOne({
+      const User = await this.serviceU.findOne({
         where: { userEntityId: userEntityId },
       });
       return User;
@@ -129,7 +133,7 @@ export class ProgramsService {
   public async getUserEdu(userEntityId: number): Promise<UsersEducation> {
     try {
       // get user education data
-      const userEdu = await this.serviceUsersEducation.findOne({
+      const userEdu = await this.serviceUE.findOne({
         where: { usduEntityId: userEntityId },
       });
       return userEdu;
@@ -144,7 +148,7 @@ export class ProgramsService {
   ): Promise<UsersMedia> {
     try {
       // get user media data based on file note
-      const userMedia = await this.serviceUsersMedia.findOne({
+      const userMedia = await this.serviceUM.findOne({
         where: {
           usmeEntityId: userEntityId,
           usmeNote: note,
@@ -194,7 +198,7 @@ export class ProgramsService {
       getUser.userLastName = user.lastName;
       getUser.userBirthDate = user.birthDate;
 
-      const usersUpdate = await this.serviceUsers.save(getUser);
+      const usersUpdate = await this.serviceU.save(getUser);
 
       // update users education data
       const getUserEdu = await this.getUserEdu(userEntityId);
@@ -203,7 +207,7 @@ export class ProgramsService {
       getUserEdu.usduDegree = education.degree;
       getUserEdu.usduFieldStudy = education.fieldStudy;
 
-      const usersEduUpdate = await this.serviceUsersEducation.save(getUserEdu);
+      const usersEduUpdate = await this.serviceUE.save(getUserEdu);
 
       // upload / create new users cv
       const cvData = {
@@ -221,10 +225,10 @@ export class ProgramsService {
       if (getCV) {
         getCV = { ...getCV, ...cvData };
       } else {
-        getCV = this.serviceUsersMedia.create(cvData);
+        getCV = this.serviceUM.create(cvData);
       }
 
-      const updateCv = await this.serviceUsersMedia.save(getCV);
+      const updateCv = await this.serviceUM.save(getCV);
 
       return { usersUpdate, usersEduUpdate, updateCv };
     } catch (error) {
@@ -242,7 +246,7 @@ export class ProgramsService {
       getUser.userPhoto = file.originalname;
       getUser.userModifiedDate = new Date();
 
-      const usersUpdate = await this.serviceUsers.save(getUser);
+      const usersUpdate = await this.serviceU.save(getUser);
 
       // update / create profile picture in userMedia
       const photoData = {
@@ -260,10 +264,10 @@ export class ProgramsService {
       if (Photo) {
         Photo = { ...Photo, ...photoData };
       } else {
-        Photo = this.serviceUsersMedia.create(photoData);
+        Photo = this.serviceUM.create(photoData);
       }
 
-      const newPhoto = await this.serviceUsersMedia.save(Photo);
+      const newPhoto = await this.serviceUM.save(Photo);
 
       return { usersUpdate, newPhoto };
     } catch (error) {
@@ -279,6 +283,9 @@ export class ProgramsService {
       const progress = await this.servicePAP.find({
         where: {
           parogUserEntityId: userEntityId,
+        },
+        relations: {
+          parogRoac: true,
         },
       });
 
@@ -350,26 +357,42 @@ export class ProgramsService {
     }
   }
 
-  public async applyBootcamp(progEntityId: number) {
+  public async applyBootcamp(userEntityId: number, progEntityId: number) {
     try {
       // create new bootcamp apply application
 
       const Apply = this.servicePA.create({
+        prapUserEntityId: userEntityId,
         prapProgEntityId: progEntityId,
         prapTestScore: 0,
         prapGpa: 0,
         prapIqTest: 0,
+        prapReview: null,
         prapModifiedDate: new Date(),
+        prapStatus: { status: 'Apply' } as Status,
       });
 
       const createApply = await this.servicePA.save(Apply);
 
+      const parogEmp = await this.serviceE
+        .createQueryBuilder('employee')
+        .select('employee.emp_entity_id AS "empEntityId"')
+        .where('employee.empJoro = :empJoroId', { empJoroId: 5 })
+        .andWhere('employee.empCurrentFlag = :empCurrentFlag', {
+          empCurrentFlag: 1,
+        })
+        .getRawOne();
+
       const ApplyProgress = this.servicePAP.create({
+        parogUserEntityId: userEntityId,
         parogProgEntityId: progEntityId,
         parogActionDate: new Date(),
         parogModifiedDate: new Date(),
         parogComment: null,
-        parogProgressName: 'Apply Aplication',
+        parogProgressName: 'Done',
+        parogEmpEntity: { empEntityId: parogEmp.empEntityId } as Employee,
+        parogStatus: { status: 'Open' } as Status,
+        parogRoac: { roacId: 1 } as RouteActions,
       });
 
       const createApplyProgress = await this.servicePAP.save(ApplyProgress);

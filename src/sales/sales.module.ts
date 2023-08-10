@@ -13,6 +13,7 @@ import { ProgramApply } from 'output/entities/ProgramApply';
 import { ProgramApplyProgress } from 'output/entities/ProgramApplyProgress';
 import { MulterModule } from '@nestjs/platform-express';
 import { UploadMulter } from 'src/multer/multer';
+import { Employee } from 'output/entities/Employee';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { UploadMulter } from 'src/multer/multer';
       ProgramEntity,
       ProgramApply,
       ProgramApplyProgress,
+      Employee,
     ]),
     MulterModule.register(UploadMulter.MulterOption()),
   ],

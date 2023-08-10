@@ -5,102 +5,102 @@ import {
   JoinColumn,
   OneToMany,
   OneToOne,
-} from 'typeorm';
-import { BatchTrainee } from './BatchTrainee';
-import { BatchTraineeEvaluation } from './BatchTraineeEvaluation';
-import { CartItems } from './CartItems';
-import { Employee } from './Employee';
-import { ProgramApply } from './ProgramApply';
-import { ProgramApplyProgress } from './ProgramApplyProgress';
-import { ProgramReviews } from './ProgramReviews';
-import { SalesOrderHeader } from './SalesOrderHeader';
-import { TalentApply } from './TalentApply';
-import { TransactionPayment } from './TransactionPayment';
-import { BusinessEntity } from './BusinessEntity';
-import { UsersAccount } from './UsersAccount';
-import { UsersAddress } from './UsersAddress';
-import { UsersEducation } from './UsersEducation';
-import { UsersEmail } from './UsersEmail';
-import { UsersExperiences } from './UsersExperiences';
-import { UsersLicense } from './UsersLicense';
-import { UsersMedia } from './UsersMedia';
-import { UsersPhones } from './UsersPhones';
-import { UsersRoles } from './UsersRoles';
-import { UsersSkill } from './UsersSkill';
+} from "typeorm";
+import { BatchTrainee } from "./BatchTrainee";
+import { BatchTraineeEvaluation } from "./BatchTraineeEvaluation";
+import { CartItems } from "./CartItems";
+import { Employee } from "./Employee";
+import { ProgramApply } from "./ProgramApply";
+import { ProgramApplyProgress } from "./ProgramApplyProgress";
+import { ProgramReviews } from "./ProgramReviews";
+import { SalesOrderHeader } from "./SalesOrderHeader";
+import { TalentApply } from "./TalentApply";
+import { TransactionPayment } from "./TransactionPayment";
+import { BusinessEntity } from "./BusinessEntity";
+import { UsersAccount } from "./UsersAccount";
+import { UsersAddress } from "./UsersAddress";
+import { UsersEducation } from "./UsersEducation";
+import { UsersEmail } from "./UsersEmail";
+import { UsersExperiences } from "./UsersExperiences";
+import { UsersLicense } from "./UsersLicense";
+import { UsersMedia } from "./UsersMedia";
+import { UsersPhones } from "./UsersPhones";
+import { UsersRoles } from "./UsersRoles";
+import { UsersSkill } from "./UsersSkill";
 
-@Index('users_pkey', ['userEntityId'], { unique: true })
-@Index('users_user_name_key', ['userName'], { unique: true })
-@Entity('users', { schema: 'users' })
+@Index("users_pkey", ["userEntityId"], { unique: true })
+@Index("users_user_name_key", ["userName"], { unique: true })
+@Entity("users", { schema: "users" })
 export class Users {
-  @Column('integer', { primary: true, name: 'user_entity_id' })
+  @Column("integer", { primary: true, name: "user_entity_id" })
   userEntityId: number;
 
-  @Column('character varying', {
-    name: 'user_name',
+  @Column("character varying", {
+    name: "user_name",
     nullable: true,
     unique: true,
     length: 15,
   })
   userName: string | null;
 
-  @Column('character varying', {
-    name: 'user_password',
+  @Column("character varying", {
+    name: "user_password",
     nullable: true,
     length: 256,
   })
   userPassword: string | null;
 
-  @Column('character varying', {
-    name: 'user_first_name',
+  @Column("character varying", {
+    name: "user_first_name",
     nullable: true,
     length: 50,
   })
   userFirstName: string | null;
 
-  @Column('character varying', {
-    name: 'user_last_name',
+  @Column("character varying", {
+    name: "user_last_name",
     nullable: true,
     length: 50,
   })
   userLastName: string | null;
 
-  @Column('timestamp without time zone', {
-    name: 'user_birth_date',
+  @Column("timestamp without time zone", {
+    name: "user_birth_date",
     nullable: true,
   })
   userBirthDate: Date | null;
 
-  @Column('integer', { name: 'user_email_promotion', nullable: true })
+  @Column("integer", { name: "user_email_promotion", nullable: true })
   userEmailPromotion: number | null;
 
-  @Column('character varying', { name: 'user_demographic', nullable: true })
+  @Column("character varying", { name: "user_demographic", nullable: true })
   userDemographic: string | null;
 
-  @Column('timestamp without time zone', {
-    name: 'user_modified_date',
+  @Column("timestamp without time zone", {
+    name: "user_modified_date",
     nullable: true,
   })
   userModifiedDate: Date | null;
 
-  @Column('character varying', {
-    name: 'user_photo',
+  @Column("character varying", {
+    name: "user_photo",
     nullable: true,
     length: 255,
   })
   userPhoto: string | null;
 
-  @Column('integer', { name: 'user_current_role', nullable: true })
+  @Column("integer", { name: "user_current_role", nullable: true })
   userCurrentRole: number | null;
 
   @OneToMany(
     () => BatchTrainee,
-    (batchTrainee) => batchTrainee.batrTraineeEntity,
+    (batchTrainee) => batchTrainee.batrTraineeEntity
   )
   batchTrainees: BatchTrainee[];
 
   @OneToMany(
     () => BatchTraineeEvaluation,
-    (batchTraineeEvaluation) => batchTraineeEvaluation.btevTraineeEntity,
+    (batchTraineeEvaluation) => batchTraineeEvaluation.btevTraineeEntity
   )
   batchTraineeEvaluations: BatchTraineeEvaluation[];
 
@@ -115,19 +115,19 @@ export class Users {
 
   @OneToMany(
     () => ProgramApplyProgress,
-    (programApplyProgress) => programApplyProgress.parogUserEntity,
+    (programApplyProgress) => programApplyProgress.parogUserEntity
   )
   programApplyProgresses: ProgramApplyProgress[];
 
   @OneToMany(
     () => ProgramReviews,
-    (programReviews) => programReviews.prowUserEntity,
+    (programReviews) => programReviews.prowUserEntity
   )
   programReviews: ProgramReviews[];
 
   @OneToMany(
     () => SalesOrderHeader,
-    (salesOrderHeader) => salesOrderHeader.soheUserEntity,
+    (salesOrderHeader) => salesOrderHeader.soheUserEntity
   )
   salesOrderHeaders: SalesOrderHeader[];
 
@@ -136,12 +136,12 @@ export class Users {
 
   @OneToMany(
     () => TransactionPayment,
-    (transactionPayment) => transactionPayment.trpaUserEntity,
+    (transactionPayment) => transactionPayment.trpaUserEntity
   )
   transactionPayments: TransactionPayment[];
 
   @OneToOne(() => BusinessEntity, (businessEntity) => businessEntity.users)
-  @JoinColumn([{ name: 'user_entity_id', referencedColumnName: 'entityId' }])
+  @JoinColumn([{ name: "user_entity_id", referencedColumnName: "entityId" }])
   userEntity: BusinessEntity;
 
   @OneToMany(() => UsersAccount, (usersAccount) => usersAccount.usacUserEntity)
@@ -152,7 +152,7 @@ export class Users {
 
   @OneToMany(
     () => UsersEducation,
-    (usersEducation) => usersEducation.usduEntity,
+    (usersEducation) => usersEducation.usduEntity
   )
   usersEducations: UsersEducation[];
 
@@ -161,7 +161,7 @@ export class Users {
 
   @OneToMany(
     () => UsersExperiences,
-    (usersExperiences) => usersExperiences.usexEntity,
+    (usersExperiences) => usersExperiences.usexEntity
   )
   usersExperiences: UsersExperiences[];
 

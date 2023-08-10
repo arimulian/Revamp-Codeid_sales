@@ -8,6 +8,7 @@ import {
 } from "typeorm";
 import { Employee } from "./Employee";
 import { ProgramEntity } from "./ProgramEntity";
+import { RouteActions } from "./RouteActions";
 import { Status } from "./Status";
 import { Users } from "./Users";
 
@@ -67,6 +68,13 @@ export class ProgramApplyProgress {
     { name: "parog_prog_entity_id", referencedColumnName: "progEntityId" },
   ])
   parogProgEntity: ProgramEntity;
+
+  @ManyToOne(
+    () => RouteActions,
+    (routeActions) => routeActions.programApplyProgresses
+  )
+  @JoinColumn([{ name: "parog_roac_id", referencedColumnName: "roacId" }])
+  parogRoac: RouteActions;
 
   @ManyToOne(() => Status, (status) => status.programApplyProgresses)
   @JoinColumn([{ name: "parog_status", referencedColumnName: "status" }])
