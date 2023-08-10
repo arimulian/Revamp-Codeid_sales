@@ -7,7 +7,7 @@ import { FintechDto } from './dto/fintech.dto';
 export class FintechController {
   constructor(private fintechService: FintechService) {}
 
-  @Get()
+  @Get('accounts')
   findFintech(@Query() account: FintechDto): Promise<Fintech[]> {
     return this.fintechService.getFintech(account);
   }

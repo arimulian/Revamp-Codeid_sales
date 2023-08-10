@@ -74,8 +74,8 @@ export class CartService {
 
         newItem.caitUserEntity = user;
         newItem.caitProgEntity = program;
-        console.log(newItem);
-        // return await this.cartRepository.save(newItem);
+        // console.log(newItem);
+        return await this.cartRepository.save(newItem);
       } else {
         const newTotal = cart[0].caitUnitPrice;
         // Update the item quantity

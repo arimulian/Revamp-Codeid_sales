@@ -1,23 +1,23 @@
-import { Body, Controller, Get, Post, Query, UsePipes } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { OrderService } from './order.service';
-import { CartUserDto } from 'src/cart/dto/cart-user.dto';
-import { CreateOrderDto } from './dto/create-order.dto';
+import { OrderDto } from './dto/order.dto';
+import { SummaryOrderrDto } from './dto/summary-order.dto';
 
-@Controller('api/order')
+@Controller('api/sales')
 export class OrderController {
   constructor(private orderService: OrderService) {}
 
-  //   @Get()
-  //   //   async findOrder(@Query() user: CartUserDto) {
-  //   //     return this.orderService.createOrder(user);
-  //   //   }
-  @Post('create')
-  async createOrder(@Body() user: CreateOrderDto) {
+  @Post('createOrder')
+  async createOrder(@Body() user: OrderDto) {
     return this.orderService.createOrder(user);
   }
+  @Post('cancelOrder')
+  async cancelOrder(@Body() user: OrderDto) {
+    return this.orderService.cancelOrder(user);
+  }
 
-  @Get('test')
-  getNumber() {
-    return this.orderService.generateOrderNumber();
+  @Get('summaryOrder')
+  async findOrder(@Query() orderNumber: SummaryOrderrDto) {
+    return this.orderService.findOrder(orderNumber);
   }
 }

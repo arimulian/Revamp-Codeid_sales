@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import {
   Column,
   Entity,
@@ -5,19 +6,19 @@ import {
   JoinColumn,
   ManyToOne,
   OneToMany,
-} from "typeorm";
-import { ProgramEntity } from "./ProgramEntity";
-import { SalesOrderHeader } from "./SalesOrderHeader";
-import { Modules } from "./Modules";
+} from 'typeorm';
+import { ProgramEntity } from './ProgramEntity';
+import { SalesOrderHeader } from './SalesOrderHeader';
+import { Modules } from './Modules';
 
-@Index("status_pkey", ["status"], { unique: true })
-@Entity("status", { schema: "master" })
+@Index('status_pkey', ['status'], { unique: true })
+@Entity('status', { schema: 'master' })
 export class Status {
-  @Column("character varying", { primary: true, name: "status", length: 15 })
+  @Column('character varying', { primary: true, name: 'status', length: 15 })
   status: string;
 
-  @Column("timestamp without time zone", {
-    name: "status_modified_date",
+  @Column('timestamp without time zone', {
+    name: 'status_modified_date',
     nullable: true,
   })
   statusModifiedDate: Date | null;
@@ -27,11 +28,11 @@ export class Status {
 
   @OneToMany(
     () => SalesOrderHeader,
-    (salesOrderHeader) => salesOrderHeader.soheStatus
+    (salesOrderHeader) => salesOrderHeader.soheStatus,
   )
   salesOrderHeaders: SalesOrderHeader[];
 
   @ManyToOne(() => Modules, (modules) => modules.statuses)
-  @JoinColumn([{ name: "status_module", referencedColumnName: "moduleName" }])
+  @JoinColumn([{ name: 'status_module', referencedColumnName: 'moduleName' }])
   statusModule: Modules;
 }

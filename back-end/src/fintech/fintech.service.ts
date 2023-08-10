@@ -1,6 +1,10 @@
 /* eslint-disable prettier/prettier */
 /* eslint-disable @typescript-eslint/no-empty-function */
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Fintech } from 'src/entities/Fintech';
 import { UsersAccount } from 'src/entities/UsersAccount';
@@ -32,15 +36,15 @@ export class FintechService {
       },
     });
     if (!account) {
-      throw new InternalServerErrorException(
+      throw new BadRequestException(
         'account number: ' + accountNumber + ' is not valid',
       );
-    } else if (account.usacStatus === 'inactive') {
-      throw new InternalServerErrorException(
+    } else if (account.usacStatus.toLowerCase() === 'inactive') {
+      throw new BadRequestException(
         'account number: ' + accountNumber + ' is inactive',
       );
-    } else if (account.usacStatus === 'blocked') {
-      throw new InternalServerErrorException(
+    } else if (account.usacStatus.toLowerCase() === 'blocked') {
+      throw new BadRequestException(
         'account number: ' + accountNumber + ' is blocked',
       );
     }
@@ -59,16 +63,20 @@ export class FintechService {
     try {
       const account = await this.usersAccountRepository.findOne({
         where: { usacAccountNumber: accountNumber },
-        relations: { usacUserEntity: true },
+        relations: { usacUserEntity: { cartItems: true } },
         select: {
-          usacUserEntity: { userName: true, userEntityId: true },
+          usacUserEntity: {
+            userName: true,
+            userEntityId: true,
+            cartItems: { caitUnitPrice: true },
+          },
         },
       });
       return {
         data: {
           accountNumber: account.usacAccountNumber,
           accountName: account.usacUserEntity,
-          credit: account.usacSaldo,
+          credit: account.usacUserEntity.cartItems[0].caitUnitPrice,
         },
       };
     } catch (error) {
