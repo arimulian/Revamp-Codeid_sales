@@ -7,12 +7,14 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CartItems } from 'src/entities/CartItems';
+
 import { Repository } from 'typeorm';
 import { CartUserDto } from './dto/cart-user.dto';
 import { AddToCartDto } from './dto/add-cart.dto';
-import { ProgramEntity } from 'src/entities/ProgramEntity';
-import { Users } from 'src/entities/Users';
+
+import { CartItems } from 'output/entities/CartItems';
+import { ProgramEntity } from 'output/entities/ProgramEntity';
+import { Users } from 'output/entities/Users';
 
 @Injectable()
 export class CartService {

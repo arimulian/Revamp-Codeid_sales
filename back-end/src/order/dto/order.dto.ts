@@ -8,4 +8,5 @@ export class OrderDto {
   trpaCodeNumber: string;
   statusModule: string;
   soheId: number;
+  accountNumber: string;
 }

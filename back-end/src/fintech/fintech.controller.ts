@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Query } from '@nestjs/common';
 import { FintechService } from './fintech.service';
-import { Fintech } from 'src/entities/Fintech';
 import { FintechDto } from './dto/fintech.dto';
+import { Fintech } from 'output/entities/Fintech';
 
 @Controller('api/fintech')
 export class FintechController {

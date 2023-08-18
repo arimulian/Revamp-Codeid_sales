@@ -8,6 +8,6 @@ export const typeOrmConfig: TypeOrmModuleOptions = {
   username: 'postgres',
   password: 'Manurung081020*',
   database: 'revamp_db',
-  entities: ['dist/entities/*{ts,js}'],
+  entities: ['dist/output/entities/*{ts,js}'],
   synchronize: false,
 };

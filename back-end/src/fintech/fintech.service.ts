@@ -3,13 +3,13 @@
 import {
   BadRequestException,
   Injectable,
-  InternalServerErrorException,
+  NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Fintech } from 'src/entities/Fintech';
-import { UsersAccount } from 'src/entities/UsersAccount';
 import { Repository } from 'typeorm';
 import { FintechDto } from './dto/fintech.dto';
+import { UsersAccount } from 'output/entities/UsersAccount';
+import { Fintech } from 'output/entities/Fintech';
 
 @Injectable()
 export class FintechService {
@@ -68,19 +68,25 @@ export class FintechService {
           usacUserEntity: {
             userName: true,
             userEntityId: true,
-            cartItems: { caitUnitPrice: true },
+            cartItems: {
+              caitUnitPrice: true,
+              caitQuantity: true,
+              caitId: true,
+            },
           },
         },
       });
+
+      const lastIndex = account.usacUserEntity.cartItems.length - 1;
       return {
         data: {
           accountNumber: account.usacAccountNumber,
+          credit: account.usacUserEntity.cartItems[lastIndex].caitUnitPrice,
           accountName: account.usacUserEntity,
-          credit: account.usacUserEntity.cartItems[0].caitUnitPrice,
         },
       };
-    } catch (error) {
-      throw new InternalServerErrorException(error);
+    } catch (e) {
+      throw new NotFoundException('cart not found');
     }
   }
 }
